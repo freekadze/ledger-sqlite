@@ -11,11 +11,13 @@
       color: #333;
       margin: 0;
       padding: 20px;
+      /* 使用 Flexbox 將內容置中 */
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
     }
+    /* 主要容器 */
     .container {
       max-width: 800px;
       width: 95%;
@@ -36,6 +38,7 @@
     a:hover {
       text-decoration: underline;
     }
+    /* 返回連結樣式 */
     .home-link {
       color: #F2B880;
       font-size: 20px;
@@ -84,20 +87,21 @@
   </style>
 </head>
 <body>
+  <!-- 返回連結，置於主要容器外，靠上顯示 -->
   <div style="max-width: 800px; width: 95%; margin-bottom: 20px; text-align: center;">
     <a href="/ledger/<%= ledger.id %>" class="home-link">返回帳本</a>
   </div>
   
   <div class="container">
     <h1>分帳結算結果</h1>
-    <p>帳本：<%= ledger.name %></p>
+    <p>帳本：<%= ledger.name || '未知帳本' %></p>
     <p>全部交易金額：<%= totalAmount %> TWD</p>
     
     <h2>各成員支付總額 (TWD)</h2>
     <ul>
       <% members.forEach(m => { %>
         <li>
-          <strong><%= m.displayName %></strong>：<%= payments[m.id] ? payments[m.id].toFixed(2) : "0.00" %> TWD
+          <strong><%= m.displayname %></strong>：<%= payments[m.id] ? payments[m.id].toFixed(2) : "0.00" %> TWD
         </li>
       <% }) %>
     </ul>
@@ -118,11 +122,13 @@
       <% Object.keys(rates).forEach(cur => { %>
         <% if (cur === 'USD' || cur === 'EUR' || cur === 'JPY' || cur === 'THB' || cur === 'MYR') { %>
           <label><%= cur %> 匯率 (1 TWD 兌換 <%= cur %>)：</label>
-          <input type="number" step="0.0001" name="rate_<%= cur %>" value="<%= rates[cur] %>" min="0"><br>
+          <input type="number" step="0.0001" name="rate_<%= cur %>" value="<%= parseFloat(rates[cur]).toFixed(4) %>" min="0"><br>
         <% } %>
       <% }); %>
       <button type="submit">套用匯率</button>
     </form>
+    
+    <br>
   </div>
 </body>
 </html>
