@@ -14,9 +14,9 @@ const app = express();
 const port = 3000;
 
 // ========== Passport 與 LINE Login 設定 ==========
-const LINE_CHANNEL_ID = '2006866430';
-const LINE_CHANNEL_SECRET = '2eafb1e2e5aaf5666870f60582575021';
-const CALLBACK_URL = 'https://node.tasko.uk/auth/line/callback';
+const LINE_CHANNEL_ID = '2006877676';
+const LINE_CHANNEL_SECRET = 'c03cc34db6bd3c8e93ffa3903538971d';
+const CALLBACK_URL = 'https://ledger-sqlite.onrender.com/auth/line/callback';
 
 //const CALLBACK_URL = 'http://59.127.84.253:3000/auth/line/callback';
 
