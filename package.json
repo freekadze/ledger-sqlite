@@ -1,7 +1,7 @@
 {
   "name": "ledger-sqlite-app",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "start": "node app.js"
   },
@@ -20,5 +20,8 @@
     "passport-line": "^0.0.4",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7"
-  }
+  },
+  "engines": {
+  "node": ">=14.0.0"
+}
 }
