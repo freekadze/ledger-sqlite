@@ -13,25 +13,13 @@ const crypto = require('crypto'); // 用於產生隨機 token
 const app = express();
 const port = 3000;
 
-passport.use(new LineStrategy({
-  channelID: LINE_CHANNEL_ID,
-  channelSecret: LINE_CHANNEL_SECRET,
-  callbackURL: CALLBACK_URL,
-  scope: ['profile']
-}, async (accessToken, refreshToken, profile, done) => {
-  try {
-    const user = await getOrCreateUser(profile);
-    return done(null, user);
-  } catch (err) {
-    return done(err);
-  }
-}));
 
 // ========== Passport 與 LINE Login 設定 ==========
 const LINE_CHANNEL_ID = process.env.LINE_CHANNEL_ID;
 const LINE_CHANNEL_SECRET = process.env.LINE_CHANNEL_SECRET;
 // 注意：這邊可以設定預設值，但建議在 Render 上以環境變數傳入正確值
 const CALLBACK_URL = process.env.CALLBACK_URL ;
+
 
 passport.use(new LineStrategy({
   channelID: LINE_CHANNEL_ID,
