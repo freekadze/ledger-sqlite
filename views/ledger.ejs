@@ -219,7 +219,7 @@
             <input type="datetime-local" name="created_at" id="created_at" placeholder="預設為目前時間">
   
             <p>分攤人員（複選，預設全部勾選）：</p>
-            <div class="checkbox-group">
+            <div class="transaction-container">
               <% members.forEach(m => { %>
                 <label>
                   <input type="checkbox" name="splitters" value="<%= m.id %>" checked>
@@ -326,6 +326,8 @@
               <option value="USD">USD</option>
               <option value="EUR">EUR</option>
               <option value="JPY">JPY</option>
+              <option value="THB">THB</option>
+              <option value="MYR">MYR</option>
             </select>
   
             <label for="description">用途/描述：</label>
@@ -335,7 +337,7 @@
             <input type="datetime-local" name="created_at" id="created_at" placeholder="預設為目前時間">
   
             <p>分攤人員（複選，預設全部勾選）：</p>
-            <div class="checkbox-group">
+            <div class="transaction-container">
               <% members.forEach(m => { %>
                 <label>
                   <input type="checkbox" name="splitters" value="<%= m.id %>" checked>
