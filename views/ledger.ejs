@@ -194,7 +194,8 @@
             <label for="payer">付款人：</label>
             <select name="payer" id="payer">
               <% members.forEach(m => { %>
-                <option value="<%= m.id %>"><%= m.displayName %></option>
+                <!-- 改用 m.displayname，確保符合資料庫的欄位名稱 -->
+                <option value="<%= m.id %>"><%= m.displayname %></option>
               <% }) %>
             </select>
   
@@ -222,7 +223,7 @@
               <% members.forEach(m => { %>
                 <label>
                   <input type="checkbox" name="splitters" value="<%= m.id %>" checked>
-                  <%= m.displayName %>
+                  <%= m.displayname %>
                 </label>
               <% }) %>
             </div>
@@ -268,7 +269,7 @@
           <h3>目前成員</h3>
           <ul>
             <% members.forEach(m => { %>
-              <li><%= m.displayName %></li>
+              <li><%= m.displayname %></li>
             <% }) %>
           </ul>
           <h3>邀請新成員</h3>
@@ -312,7 +313,7 @@
             <label for="payer">付款人：</label>
             <select name="payer" id="payer">
               <% members.forEach(m => { %>
-                <option value="<%= m.id %>"><%= m.displayName %></option>
+                <option value="<%= m.id %>"><%= m.displayname %></option>
               <% }) %>
             </select>
   
@@ -338,7 +339,7 @@
               <% members.forEach(m => { %>
                 <label>
                   <input type="checkbox" name="splitters" value="<%= m.id %>" checked>
-                  <%= m.displayName %>
+                  <%= m.displayname %>
                 </label>
               <% }) %>
             </div>
@@ -362,7 +363,7 @@
                     <p><strong>建立者：</strong> <%= tx.creatorName %></p>
                     <p><strong>時間：</strong> <%= tx.created_at %></p>
                     <p class="split-persons">
-                      <strong>分攤人員：</strong> <%= tx.splitPersons ? tx.splitPersons : '無' %>
+                     <strong>分攤人員：</strong> <%= tx.splitPersons ? tx.splitPersons : '無' %>
                     </p>
                   </div>
                   <% if (tx.creator === user.id) { %>
