@@ -13,12 +13,25 @@ const crypto = require('crypto'); // 用於產生隨機 token
 const app = express();
 const port = 3000;
 
-// ========== Passport 與 LINE Login 設定 ==========
-const LINE_CHANNEL_ID = '2006877676';
-const LINE_CHANNEL_SECRET = 'c03cc34db6bd3c8e93ffa3903538971d';
-const CALLBACK_URL = 'https://ledger-sqlite.onrender.com/auth/line/callback';
+passport.use(new LineStrategy({
+  channelID: LINE_CHANNEL_ID,
+  channelSecret: LINE_CHANNEL_SECRET,
+  callbackURL: CALLBACK_URL,
+  scope: ['profile']
+}, async (accessToken, refreshToken, profile, done) => {
+  try {
+    const user = await getOrCreateUser(profile);
+    return done(null, user);
+  } catch (err) {
+    return done(err);
+  }
+}));
 
-//const CALLBACK_URL = 'http://59.127.84.253:3000/auth/line/callback';
+// ========== Passport 與 LINE Login 設定 ==========
+const LINE_CHANNEL_ID = process.env.LINE_CHANNEL_ID;
+const LINE_CHANNEL_SECRET = process.env.LINE_CHANNEL_SECRET;
+// 注意：這邊可以設定預設值，但建議在 Render 上以環境變數傳入正確值
+const CALLBACK_URL = process.env.CALLBACK_URL ;
 
 passport.use(new LineStrategy({
   channelID: LINE_CHANNEL_ID,
