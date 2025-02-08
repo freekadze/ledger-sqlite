@@ -11,6 +11,8 @@ const { Pool } = require('pg');
 
 const app = express();
 const port = process.env.PORT || 3000;
+process.env.PGCLIENTENCODING = 'utf8';
+
 
 // 從環境變數讀取設定
 const LINE_CHANNEL_ID = process.env.LINE_CHANNEL_ID;
