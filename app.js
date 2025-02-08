@@ -11,8 +11,6 @@ const { Pool } = require('pg');
 
 const app = express();
 const port = process.env.PORT || 3000;
-process.env.PGCLIENTENCODING = 'utf8';
-
 
 // 從環境變數讀取設定
 const LINE_CHANNEL_ID = process.env.LINE_CHANNEL_ID;
@@ -21,7 +19,7 @@ const CALLBACK_URL = process.env.CALLBACK_URL;
 const SESSION_SECRET = process.env.SESSION_SECRET || 'your-session-secret';
 const DATABASE_URL = process.env.DATABASE_URL; // Render 提供的 PostgreSQL 連線字串
 
-// 建立 PostgreSQL 連線池，若使用 Render，通常需要 ssl 設定
+// 建立 PostgreSQL 連線池，Render 部署時通常需要 ssl 設定
 const pool = new Pool({
   connectionString: DATABASE_URL,
   ssl: { rejectUnauthorized: false }
@@ -34,7 +32,7 @@ const pool = new Pool({
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         line_id TEXT UNIQUE,
-        displayName TEXT
+        displayname TEXT
       );
     `);
     await pool.query(`
@@ -136,14 +134,14 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// 輔助函式：依據 LINE profile 取得或建立使用者
+// 輔助函式：根據 LINE profile 取得或建立使用者
 async function getOrCreateUser(profile) {
   const res = await pool.query('SELECT * FROM users WHERE line_id = $1', [profile.id]);
   if (res.rows.length > 0) {
     return res.rows[0];
   } else {
     const insertRes = await pool.query(
-      'INSERT INTO users (line_id, displayName) VALUES ($1, $2) RETURNING *',
+      'INSERT INTO users (line_id, displayname) VALUES ($1, $2) RETURNING *',
       [profile.id, profile.displayName]
     );
     return insertRes.rows[0];
@@ -160,12 +158,12 @@ function ensureAuthenticated(req, res, next) {
 
 // ========== 路由設定 ==========
 
-// 登入頁面（請自行建立 views/login.ejs，如下簡單範例）
+// 登入頁面（請自行建立 views/login.ejs，可參考簡單範例）
 app.get('/login', (req, res) => {
   res.render('login', { message: null });
 });
 
-// 登出 (passport v0.6+ 調整為 callback 方式)
+// 登出（passport v0.6+ 使用 callback 方式）
 app.get('/logout', (req, res, next) => {
   req.logout(function(err) {
     if (err) { return next(err); }
@@ -199,7 +197,7 @@ app.get('/', ensureAuthenticated, async (req, res) => {
   }
 });
 
-// 建立新帳本（建立後自動將 owner 加入成員）
+// 建立新帳本（建立後自動加入建立者為成員）
 app.post('/ledger', ensureAuthenticated, async (req, res) => {
   const ledgerName = req.body.ledgerName || 'Untitled Ledger';
   try {
@@ -259,7 +257,7 @@ app.get('/ledger/invite', ensureAuthenticated, async (req, res) => {
   }
 });
 
-// 顯示帳本頁面（交易紀錄、成員管理等）
+// 顯示帳本頁面（包含交易紀錄、成員管理等）
 app.get('/ledger/:id', ensureAuthenticated, async (req, res) => {
   const ledgerId = req.params.id;
   try {
@@ -270,26 +268,26 @@ app.get('/ledger/:id', ensureAuthenticated, async (req, res) => {
     const membershipRes = await pool.query('SELECT * FROM ledger_members WHERE ledger_id = $1 AND user_id = $2', [ledgerId, req.user.id]);
     if (membershipRes.rows.length === 0) return res.status(403).send('你無權存取此帳本');
     
-    // 查詢交易紀錄，使用 PostgreSQL 的 string_agg 進行分帳人員彙整
+    // 查詢交易紀錄，利用 PostgreSQL 的 string_agg 彙整分攤人員
     const transactionsRes = await pool.query(`
       SELECT t.*, 
-             p.displayName AS "payerName", 
-             c.displayName AS "creatorName",
-             COALESCE(string_agg(u.displayName, ', '), '') AS "splitPersons"
+             p.displayname AS "payerName", 
+             c.displayname AS "creatorName",
+             COALESCE(string_agg(u.displayname, ', '), '') AS "splitPersons"
       FROM transactions t
       JOIN users p ON t.payer = p.id
       JOIN users c ON t.creator = c.id
       LEFT JOIN transaction_splitters ts ON t.id = ts.transaction_id
       LEFT JOIN users u ON ts.user_id = u.id
       WHERE t.ledger_id = $1
-      GROUP BY t.id, p.displayName, c.displayName
+      GROUP BY t.id, p.displayname, c.displayname
       ORDER BY t.id ASC
     `, [ledgerId]);
     const transactions = transactionsRes.rows;
     
     const membersRes = await pool.query(`
-      SELECT u.* FROM users u
-      JOIN ledger_members lm ON u.id = lm.user_id
+      SELECT u.* FROM users u 
+      JOIN ledger_members lm ON u.id = lm.user_id 
       WHERE lm.ledger_id = $1
     `, [ledgerId]);
     const members = membersRes.rows;
@@ -322,7 +320,7 @@ app.post('/ledger/:id/delete', ensureAuthenticated, async (req, res) => {
     if (!ledger) return res.status(404).send('找不到該帳本');
     if (ledger.owner !== req.user.line_id) return res.status(403).send('只有帳本擁有者才能刪除帳本');
     
-    // 由於外鍵設定 ON DELETE CASCADE，可直接刪除
+    // 由於外鍵 ON DELETE CASCADE，可直接刪除帳本
     await pool.query('DELETE FROM ledger WHERE id = $1', [ledgerId]);
     res.redirect('/');
   } catch (err) {
@@ -330,7 +328,7 @@ app.post('/ledger/:id/delete', ensureAuthenticated, async (req, res) => {
   }
 });
 
-// 新增交易（包含分帳人員選擇）
+// 新增交易（包含分攤人員選擇）
 app.post('/ledger/:id/transaction', ensureAuthenticated, async (req, res) => {
   const ledgerId = req.params.id;
   const { payer, amount, currency, description, created_at } = req.body;
@@ -384,7 +382,7 @@ app.post('/ledger/:ledgerId/transaction/:transactionId/delete', ensureAuthentica
   }
 });
 
-// 分帳結算：以 TWD 為基準，轉換各交易金額並計算
+// 分帳結算（GET）：以 TWD 為基準轉換各交易金額並計算
 app.get('/ledger/:id/settle', ensureAuthenticated, async (req, res) => {
   const ledgerId = req.params.id;
   try {
@@ -449,10 +447,11 @@ app.get('/ledger/:id/settle', ensureAuthenticated, async (req, res) => {
     const creditors = [];
     members.forEach(m => {
       const diff = parseFloat(net[m.id].toFixed(2));
+      // 這裡改用 m.displayname（小寫）以正確取得名稱
       if (diff < 0) {
-        debtors.push({ id: m.id, displayName: m.displayName, amount: -diff });
+        debtors.push({ id: m.id, displayName: m.displayname, amount: -diff });
       } else if (diff > 0) {
-        creditors.push({ id: m.id, displayName: m.displayName, amount: diff });
+        creditors.push({ id: m.id, displayName: m.displayname, amount: diff });
       }
     });
     
@@ -492,7 +491,7 @@ app.get('/ledger/:id/settle', ensureAuthenticated, async (req, res) => {
   }
 });
 
-// 處理使用者修改匯率後重新計算結算結果
+// 分帳結算（POST）：處理使用者修改匯率後重新計算
 app.post('/ledger/:id/settle', ensureAuthenticated, async (req, res) => {
   const ledgerId = req.params.id;
   try {
@@ -567,10 +566,11 @@ app.post('/ledger/:id/settle', ensureAuthenticated, async (req, res) => {
     const creditors = [];
     members.forEach(m => {
       const diff = parseFloat(net[m.id].toFixed(2));
+      // 改用 m.displayname 以正確取得名稱
       if (diff < 0) {
-        debtors.push({ id: m.id, displayName: m.displayName, amount: -diff });
+        debtors.push({ id: m.id, displayName: m.displayname, amount: -diff });
       } else if (diff > 0) {
-        creditors.push({ id: m.id, displayName: m.displayName, amount: diff });
+        creditors.push({ id: m.id, displayName: m.displayname, amount: diff });
       }
     });
     
