@@ -91,6 +91,7 @@
       padding: 10px 15px;
       border-radius: 5px;
       cursor: pointer;
+      transition: background-color 0.3s ease-in-out;
     }
     button:hover {
       background-color: #388e3c;
@@ -99,19 +100,18 @@
       text-align: center;
       margin-bottom: 20px;
     }
-    /* 新增這裡來控制「輸入帳本名稱」的輸入框大小 */
     input[name="ledgerName"] {
-      width: 300px;  /* 調整輸入框寬度 */
+      width: 300px;
       padding: 5px;
       font-size: 16px;
     }
   </style>
 </head>
 <body>
-    <div class="header">
-      <h1>歡迎，<%= user.displayName %></h1>
-      <a href="/logout" class="home-link">登出</a>
-    </div>
+  <div class="header">
+    <h1>歡迎，<%= user.displayName %></h1>
+    <a href="/logout" class="home-link">登出</a>
+  </div>
   <div class="container">
     <div class="tabs">
       <div class="tab active" onclick="switchTab('owned')">我建立的帳本</div>
@@ -141,7 +141,7 @@
 
     <div id="create" class="tab-content">
       <form action="/ledger" method="POST">
-        帳本名稱：<input type="text" name="ledgerName" placeholder="輸入帳本名稱">
+        帳本名稱：<input type="text" name="ledgerName" placeholder="輸入帳本名稱" required>
         <hr>
         <button type="submit">建立</button>
       </form>
@@ -157,8 +157,15 @@
         tab.classList.remove('active');
       });
       document.getElementById(tabId).classList.add('active');
-      // 更新 tab 按鈕的 active 狀態
-      document.querySelector('.tab[onclick="switchTab(\'' + tabId + '\')"]').classList.add('active');
+      document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
+      localStorage.setItem('activeTab', tabId);
+    }
+    
+    window.onload = function() {
+      const storedTab = localStorage.getItem('activeTab');
+      if (storedTab && document.getElementById(storedTab)) {
+        switchTab(storedTab);
+      }
     }
   </script>
 </body>
