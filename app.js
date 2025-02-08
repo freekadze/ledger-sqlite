@@ -239,7 +239,11 @@ app.get('/ledger/invite', ensureAuthenticated, async (req, res) => {
   try {
     const inviteRes = await pool.query('SELECT * FROM ledger_invites WHERE token = $1 AND used = 0', [token]);
     const invite = inviteRes.rows[0];
-    if (!invite) return res.status(400).send('邀請連結無效或已使用。請點此 <a href="/ledger/' + invite.ledger_id + '">返回帳本</a>');
+    if (!invite) {
+      return res.status(400).send(`
+        邀請連結無效或已使用。請點此 <a href="/ledger/${invite.ledger_id}" style="font-size:18px;">返回帳本</a>
+      `);
+    }
     
     const ledgerRes = await pool.query('SELECT * FROM ledger WHERE id = $1', [invite.ledger_id]);
     const ledger = ledgerRes.rows[0];
@@ -247,16 +251,25 @@ app.get('/ledger/invite', ensureAuthenticated, async (req, res) => {
       return res.send('你是該帳本的擁有者，因此不需要使用邀請連結。');
     }
     
-    const membershipRes = await pool.query('SELECT * FROM ledger_members WHERE ledger_id = $1 AND user_id = $2', [invite.ledger_id, req.user.id]);
+    const membershipRes = await pool.query(
+      'SELECT * FROM ledger_members WHERE ledger_id = $1 AND user_id = $2',
+      [invite.ledger_id, req.user.id]
+    );
     if (membershipRes.rows.length === 0) {
-      await pool.query('INSERT INTO ledger_members (ledger_id, user_id) VALUES ($1, $2)', [invite.ledger_id, req.user.id]);
+      await pool.query(
+        'INSERT INTO ledger_members (ledger_id, user_id) VALUES ($1, $2)',
+        [invite.ledger_id, req.user.id]
+      );
     }
     await pool.query('UPDATE ledger_invites SET used = 1 WHERE token = $1', [token]);
-    res.send('已成功加入帳本。請點此 <a href="/ledger/' + invite.ledger_id + '">返回帳本</a>');
+    res.send(`
+      已成功加入帳本。請點此 <a href="/ledger/${invite.ledger_id}" style="font-size:18px;">返回帳本</a>
+    `);
   } catch (err) {
     res.status(500).send(err.message);
   }
 });
+
 
 // 顯示帳本頁面（包含交易紀錄、成員管理等）
 app.get('/ledger/:id', ensureAuthenticated, async (req, res) => {
