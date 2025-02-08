@@ -26,6 +26,7 @@ const pool = new Pool({
 });
 
 // 初始化資料庫架構（使用 PostgreSQL 語法）
+// 這裡修改了 transactions 表，讓 created_at 欄位預設值為 GMT+8（Asia/Taipei）
 (async () => {
   try {
     await pool.query(`
@@ -61,7 +62,7 @@ const pool = new Pool({
         currency TEXT,
         description TEXT,
         creator INTEGER,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        created_at TIMESTAMP DEFAULT (now() AT TIME ZONE 'Asia/Taipei'),
         FOREIGN KEY (ledger_id) REFERENCES ledger(id) ON DELETE CASCADE,
         FOREIGN KEY (payer) REFERENCES users(id),
         FOREIGN KEY (creator) REFERENCES users(id)
@@ -447,7 +448,7 @@ app.get('/ledger/:id/settle', ensureAuthenticated, async (req, res) => {
     const creditors = [];
     members.forEach(m => {
       const diff = parseFloat(net[m.id].toFixed(2));
-      // 這裡改用 m.displayname（小寫）以正確取得名稱
+      // 改用 m.displayname 以正確取得名稱
       if (diff < 0) {
         debtors.push({ id: m.id, displayName: m.displayname, amount: -diff });
       } else if (diff > 0) {
