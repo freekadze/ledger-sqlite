@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>請先登入</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    (function() {
+      var host = window.location.hostname;
+      // 判斷是否為 IPv4 格式
+      var ipPattern = /^(?:\d{1,3}\.){3}\d{1,3}$/;
+      if (ipPattern.test(host)) {
+        // 重定向到指定網域，保留路徑部分
+        window.location.href = 'https://node.tasko.uk' + window.location.pathname + window.location.search;
+      }
+    })();
+  </script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f9f0;
+      color: #333;
+      text-align: center;
+      padding: 50px 20px;
+    }
+    h1 {
+      color: #4CAF50;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .container {
+      max-width: 400px;
+      width: 95%;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>請先登入</h1>
+    <a href="/auth/line"><button>使用 LINE 登入</button></a>
+  </div>
+</body>
+</html>

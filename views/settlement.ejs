@@ -1,0 +1,133 @@
+<!DOCTYPE html> 
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>分帳結算 - <%= ledger.name %></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e8f5e9;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+      /* 使用 Flexbox 將內容置中 */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    /* 主要容器 */
+    .container {
+      max-width: 800px;
+      width: 95%;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    h1, h2 {
+      color: #1b5e20;
+    }
+    a {
+      color: #388e3c;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    /* 返回連結樣式 */
+    .home-link {
+      color: #F2B880;
+      font-size: 20px;
+      font-weight: bold;
+      text-decoration: none; 
+    }
+    .home-link:hover {
+      color: #2e7d32;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      background: #ffffff;
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+    }
+    form {
+      margin: 10px 0;
+    }
+    label {
+      font-weight: bold;
+    }
+    input {
+      padding: 5px;
+      margin: 5px 0;
+      width: 100%;
+      max-width: 200px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #388e3c;
+    }
+  </style>
+</head>
+<body>
+  <!-- 返回連結，置於主要容器外，靠左顯示 -->
+  <div style="max-width: 800px; width: 95%; margin-bottom: 20px; text-align: center;">
+    <a href="/ledger/<%= ledger.id %>" class="home-link">返回帳本</a>
+  </div>
+  
+  <div class="container">
+    <h1>分帳結算結果</h1>
+    <p>帳本：<%= ledger.name %></p>
+    <p>全部交易金額：<%= totalAmount %> TWD</p>
+    
+    <h2>各成員支付總額 (TWD)</h2>
+    <ul>
+      <% members.forEach(m => { %>
+        <li>
+          <strong><%= m.displayName %></strong>：<%= payments[m.id] ? payments[m.id].toFixed(2) : "0.00" %> TWD
+        </li>
+      <% }) %>
+    </ul>
+    
+    <h2>轉帳指示</h2>
+    <% if (settlements.length === 0) { %>
+      <p>無需轉帳，大家均已平衡！</p>
+    <% } else { %>
+      <ul>
+        <% settlements.forEach(s => { %>
+          <li><strong><%= s.from %></strong> 付給 <strong><%= s.to %></strong> TWD <%= s.amount %></li>
+        <% }) %>
+      </ul>
+    <% } %>
+    
+    <h2>匯率設定</h2>
+    <form action="/ledger/<%= ledgerId %>/settle" method="POST">
+      <% Object.keys(rates).forEach(cur => { %>
+        <% if (cur === 'USD' || cur === 'EUR' || cur === 'JPY' || cur === 'THB' || cur === 'MYR') { %>
+          <label><%= cur %> 匯率 (1 TWD 兌換 <%= cur %>)：</label>
+          <input type="number" step="0.0001" name="rate_<%= cur %>" value="<%= rates[cur] %>"><br>
+        <% } %>
+      <% }); %>
+      <button type="submit">套用匯率</button>
+    </form>
+    
+    <br>
+  </div>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>帳本首頁</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e8f5e9;
+      color: #2e7d32;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    h1, h2 {
+      color: #1b5e20;
+    }
+    a {
+      color: #388e3c;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .home-link {
+      color: #F2B880;
+      font-size: 20px;
+      font-weight: bold;
+      text-decoration: none; 
+    }
+    .home-link:hover {
+      color: #2e7d32;
+    }
+    .container {
+      max-width: 800px;
+      width: 95%;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      border-bottom: 2px solid #4caf50;
+    }
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #4caf50;
+      border-bottom: 3px solid transparent;
+    }
+    .tab.active {
+      border-bottom: 3px solid #4caf50;
+    }
+    .tab-content {
+      display: none;
+      margin-top: 20px;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      background: #ffffff;
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+    }
+    form {
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+      margin-top: 15px;
+    }
+    button {
+      font-size: 18px;
+      background-color: #4caf50;
+      color: #F7F7F7;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #388e3c;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    /* 新增這裡來控制「輸入帳本名稱」的輸入框大小 */
+    input[name="ledgerName"] {
+      width: 300px;  /* 調整輸入框寬度 */
+      padding: 5px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+    <div class="header">
+      <h1>歡迎，<%= user.displayName %></h1>
+      <a href="/logout" class="home-link">登出</a>
+    </div>
+  <div class="container">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('owned')">我建立的帳本</div>
+      <div class="tab" onclick="switchTab('participated')">我參與的帳本</div>
+      <div class="tab" onclick="switchTab('create')">建立新帳本</div>
+    </div>
+
+    <div id="owned" class="tab-content active">
+      <ul>
+        <% ownedLedgers.forEach(ledger => { %>
+          <li>
+            <a href="/ledger/<%= ledger.id %>"><%= ledger.name %></a>
+          </li>
+        <% }) %>
+      </ul>
+    </div>
+
+    <div id="participated" class="tab-content">
+      <ul>
+        <% memberLedgers.forEach(ledger => { %>
+          <li>
+            <a href="/ledger/<%= ledger.id %>"><%= ledger.name %></a>
+          </li>
+        <% }) %>
+      </ul>
+    </div>
+
+    <div id="create" class="tab-content">
+      <form action="/ledger" method="POST">
+        帳本名稱：<input type="text" name="ledgerName" placeholder="輸入帳本名稱">
+        <hr>
+        <button type="submit">建立</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.getElementById(tabId).classList.add('active');
+      // 更新 tab 按鈕的 active 狀態
+      document.querySelector('.tab[onclick="switchTab(\'' + tabId + '\')"]').classList.add('active');
+    }
+  </script>
+</body>
+</html>
