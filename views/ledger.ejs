@@ -32,10 +32,6 @@
       font-size: 32px;
       color: #1b5e20;
     }
-    .header-container p {
-      margin: 5px 0;
-      font-size: 18px;
-    }
     .home-link {
       color: #F2B880;
       font-size: 20px;
@@ -56,11 +52,12 @@
       padding: 10px 15px;
       border-radius: 5px;
       cursor: pointer;
+      transition: background-color 0.3s ease-in-out;
     }
     button:hover {
       background-color: #388e3c;
     }
-    /* 頁籤樣式 (與首頁相同) */
+    /* 頁籤樣式 */
     .tabs {
       display: flex;
       justify-content: center;
@@ -177,9 +174,7 @@
   <div class="header-container">
     <h1>帳本：<%= ledger.name %></h1>
     <div class="header-actions">
-      <div class="header">
-         <a href="/" class="home-link">回首頁</a>
-      </div>
+      <a href="/" class="home-link">回首頁</a>
     </div>
   </div>
   
@@ -212,15 +207,14 @@
               <option value="USD">USD</option>
               <option value="EUR">EUR</option>
               <option value="JPY">JPY</option>
-	      <option value="THB">THB</option>
+              <option value="THB">THB</option>
               <option value="MYR">MYR</option>
             </select>
   
             <label for="description">用途/描述：</label>
             <input type="text" name="description" id="description">
-
+  
             <label for="created_at">交易時間(預設為目前時間)：</label>
-            <!-- 使用 datetime-local 可藉由瀏覽器選擇日期與時間 -->
             <input type="datetime-local" name="created_at" id="created_at" placeholder="預設為目前時間">
   
             <p>分攤人員（複選，預設全部勾選）：</p>
@@ -251,7 +245,7 @@
                     <p><strong>描述：</strong> <%= tx.description %></p>
                     <p><strong>建立者：</strong> <%= tx.creatorName %></p>
                     <p><strong>時間：</strong> <%= tx.created_at %></p>
-                    <p class="transaction-info">
+                    <p class="split-persons">
                       <strong>分攤人員：</strong> <%= tx.splitPersons ? tx.splitPersons : '無' %>
                     </p>
                   </div>
@@ -294,11 +288,11 @@
       </div>
   
       <div id="content4" class="tab-content">
-        <div class="transaction-container">
+        <div class="ledger-container">
           <form action="/ledger/<%= ledger.id %>/delete" method="POST" onsubmit="return confirm('確定要刪除此帳本？');">
             <button type="submit">刪除帳本</button>
           </form>
-          <form action="/ledger/<%= ledger.id %>/settle" method="GET" >
+          <form action="/ledger/<%= ledger.id %>/settle" method="GET">
             <button type="submit">分帳結算</button>
           </form>
         </div>
@@ -335,7 +329,7 @@
   
             <label for="description">用途/描述：</label>
             <input type="text" name="description" id="description">
-
+  
             <label for="created_at">交易時間(預設為目前時間)：</label>
             <input type="datetime-local" name="created_at" id="created_at" placeholder="預設為目前時間">
   
@@ -367,8 +361,8 @@
                     <p><strong>描述：</strong> <%= tx.description %></p>
                     <p><strong>建立者：</strong> <%= tx.creatorName %></p>
                     <p><strong>時間：</strong> <%= tx.created_at %></p>
-                    <p class="transaction-info">
-                     <strong>分攤人員：</strong> <%= tx.splitPersons ? tx.splitPersons : '無' %>
+                    <p class="split-persons">
+                      <strong>分攤人員：</strong> <%= tx.splitPersons ? tx.splitPersons : '無' %>
                     </p>
                   </div>
                   <% if (tx.creator === user.id) { %>
@@ -386,11 +380,11 @@
       </div>
   
       <div id="content3" class="tab-content">
-        <div class="transaction-container">
+        <div class="ledger-container">
           <form action="/ledger/<%= ledger.id %>/delete" method="POST" onsubmit="return confirm('確定要刪除此帳本？');">
             <button type="submit">刪除帳本</button>
           </form>
-          <form action="/ledger/<%= ledger.id %>/settle" method="GET" >
+          <form action="/ledger/<%= ledger.id %>/settle" method="GET">
             <button type="submit">分帳結算</button>
           </form>
         </div>
@@ -399,7 +393,6 @@
   </div>
   
   <script>
-    // 切換頁籤函式，同時存入 localStorage
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
@@ -412,7 +405,6 @@
       localStorage.setItem('activeTab', tabId);
     }
   
-    // 複製邀請連結功能
     function copyInviteLink() {
       const inviteInput = document.getElementById('inviteLinkInput');
       inviteInput.select();
